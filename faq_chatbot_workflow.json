@@ -1,0 +1,303 @@
+{
+  "name": "FAQ Chatbot - Intent Classification + Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "faq-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d816696c-1e37-47d1-ab49-f336ea1cac4c",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -144,
+        320
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "functionCode": "const msg = $json.body?.message || \"\";\n\nreturn [{\n  message: msg.toLowerCase().trim()\n}];"
+      },
+      "id": "aa081309-9457-43a9-88e8-e891d598be43",
+      "name": "Clean Input",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        64,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==Tugas kamu adalah menentukan intent dari pertanyaan user.\n\nPilih HANYA SATU intent dari daftar berikut:\npaspor_syarat\npaspor_proses\npaspor_biaya\npaspor_waktu\npaspor_percepatan\npaspor_hilang\npaspor_rusak\npaspor_anak_syarat\npaspor_anak_proses\npaspor_anak_biaya\npaspor_anak_masa_berlaku\npaspor_anak_ganda_syarat\npaspor_anak_ganda_ketentuan\ncpmi_syarat\ncpmi_biaya\nmpaspor_login_gagal\nmpaspor_pembayaran\n\nvisa_pengertian\nvisa_syarat\nvisa_overstay\n\nizin_tinggal_jenis\napec_pengertian\napec_fungsi\napec_syarat\napec_proses\napec_biaya\napec_masa_berlaku\n\nsduwhv_pengertian\nsduwhv_fungsi\nsduwhv_syarat\nsduwhv_kriteria\nsduwhv_proses\nsduwhv_ketentuan\n\nlapor_orang_asing_cara\nlapor_orang_asing_media\nlapor_apoa\nlapor_kewajiban\nlapor_tujuan\nlapor_kasus\n\njam_layanan_blitar\njam_layanan_blitar_detail\njam_layanan_blitar_pagi\njam_layanan_blitar_tutup\njam_layanan_blitar_libur\njam_layanan_blitar_ramadhan\njam_layanan_blitar_antrian\nimigrasi_blitar_alamat\nmpp_blitar_jam\nmpp_blitar_alamat\nmpp_tulungagung_jam\nmpp_tulungagung_alamat\n\npaspor_rusak_kriteria\npaspor_rusak_penggantian\npaspor_rusak_denda\npaspor_rusak_syarat\npaspor_rusak_mpaspur\n\nperubahan_identitas_paspor\nperubahan_nama_paspor\nperubahan_tempat_lahir_paspor\nperubahan_status_paspor\nbiaya_perubahan_identitas_paspor\n\naffidavit_pengertian\naffidavit_syarat\naffidavit_prosedur\naffidavit_biaya\naffidavit_fungsi\naffidavit_anak_ganda\naffidavit_paspor_ri\n\nizin_tinggal_pengertian\nitk_pengertian\nitk_penerima\nitk_perpanjangan\nitas_pengertian\nitap_pengertian\nalih_status_itk_itas\nsyarat_alih_status_itk_itas\nalih_status_itas_itap\nsyarat_itap\npelaporan_itap\nbiaya_itap\n\ntidak_diketahui\nsapaan\n\nAturan:\n1. Fokus pada kata kunci utama dalam pertanyaan user.\n2. Jika mengandung kata:\n   - \"biaya\", \"harga\", \"tarif\" → pilih paspor_biaya / visa_biaya\n   - \"syarat\", \"dokumen\", \"persyaratan\" → paspor_syarat / visa_syarat\n   - \"berapa lama\", \"durasi\", \"waktu\" → paspor_waktu / visa_waktu\n   - \"cara\", \"proses\", \"alur\" → paspor_proses / visa_proses\n   - \"hilang\" → paspor_hilang\n   - \"rusak\" → paspor_rusak\n   - \"jam\", \"buka\", \"tutup\" → imigrasi_jam\n   - \"alamat\", \"dimana\", \"lokasi\" → imigrasi_lokasi\n\n3. Jika ada lebih dari satu kemungkinan:\n   → pilih intent yang PALING SPESIFIK dan PALING KUAT keyword-nya.\n\n4. PENTING: Pilih intent \"tidak_diketahui\" JIKA:\n   - Pertanyaan di luar topik imigrasi (resep, dll).\n   - Pengguna meminta CEK STATUS permohonan, melacak nomor antrean, nomor resi, atau data personal (live data).\n   - Pengguna menanyakan error server/bug aplikasi yang spesifik.\n   - Kamu benar-benar tidak tahu intent yang pas.\n   JANGAN asal menebak atau mengosongkan jawaban.\n\nContoh:\n- \"berapa biaya paspor baru?\" → paspor_biaya\n- \"apa saja syarat bikin paspor?\" → paspor_syarat\n- \"berapa lama paspor jadi?\" → paspor_waktu\n- \"jam buka imigrasi blitar?\" → imigrasi_jam\n- \"alamat kantor imigrasi blitar?\" → imigrasi_lokasi\n- \"halo\", \"selamat pagi\", \"hai bot\" → sapaan\n- \"siapa namamu?\", \"resep nasi goreng\" → tidak_diketahui\n- \"tolong cek status permohonan paspor saya dengan nomor antrean 12345\" → tidak_diketahui\n- \"kenapa aplikasi m-paspor error 500 terus?\" → tidak_diketahui\n\nCPMI (Calon Pekerja Migran Indonesia)\nAPEC (Kartu Perjalanan Bisnis / APEC Business Travel Card)\nSDUWHV (Surat Dukungan Untuk Work and Holiday Visa)\nITK (Izin Tinggal Kunjungan)\nITAS / KITAS (Izin Tinggal / Kartu Izin Tinggal Terbatas)\nITAP / KITAP (Izin Tinggal / Kartu Izin Tinggal Tetap)\nAPOA (Aplikasi Pelaporan Orang Asing)\nMPP (Mal Pelayanan Publik)\nM-Paspor (Aplikasi pendaftaran antrean paspor online)\nAffidavit (Fasilitas keimigrasian/paspor untuk anak berkewarganegaraan ganda)\nBAP (Berita Acara Pemeriksaan, biasanya untuk proses paspor hilang atau rusak)\nVoA (Visa on Arrival / Visa Kunjungan Saat Kedatangan)\nWNA (Warga Negara Asing)\nWNI (Warga Negara Indonesia)\n\nPertanyaan user:\n{{ $json.message }}\n\nJawab hanya dengan nama intent tanpa penjelasan.",
+        "options": {}
+      },
+      "id": "feb80bc9-961e-4327-95b1-572b1bf39dfc",
+      "name": "AI Intent Classifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        256,
+        480
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ intent: $json.output.trim(), message: $json.message }];"
+      },
+      "id": "ab9f220c-5ebf-4e3c-9dba-40f62bd5caaf",
+      "name": "Parse Intent",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        528,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "976a64ed-831a-46ed-a929-b45b661c547e",
+      "name": "Google Sheets (FAQ)",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        656,
+        480
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "functionCode": "const sheetData = items.map(i => i.json);\n\n// ambil intent dari node Parse Intent\nconst userIntent = $items(\"Parse Intent\")[0].json.intent;\n\n// cari berdasarkan intent (bukan keyword lagi)\nconst best = sheetData.find(d => d.intent === userIntent);\n\n// 🔥 kalau tidak ditemukan\nif (!best) {\n  return [{\n    message: userIntent,\n    faq: \"NOT_FOUND\"\n  }];\n}\n\n// format output\nreturn [{\n  message: userIntent,\n  faq: `\nTopik: ${best.question}\n\nJawaban:\n${best.answer}\n\nLink:\n${best.url || \"-\"}\n`\n}];"
+      },
+      "id": "c2d45594-9343-403a-b6b4-08b7f4a06206",
+      "name": "Format Data",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        864,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.faq }}",
+        "options": {
+          "systemMessage": "Kamu adalah Customer Service resmi Kantor Imigrasi Republik Indonesia.\n\nTugas utama:\n- Menjawab pertanyaan pengguna berdasarkan data FAQ yang diberikan.\n- Gunakan bahasa yang ramah, profesional, jelas, dan mudah dipahami.\n- Jika pengguna menyapa, balas dengan ramah dan tanyakan apa yang bisa dibantu.\n\nData FAQ:\n{{ $json.faq }}\n\nAturan menjawab:\n1. Jawaban harus natural seperti Customer Service manusia.\n2. Kembangkan jawaban dari data FAQ, tetapi jangan mengubah informasi inti.\n3. Gunakan format yang rapi dan mudah dibaca.\n4. Gunakan poin atau daftar hanya jika memang diperlukan.\n5. Jangan mengulang kalimat, link, alamat, atau nomor kontak lebih dari satu kali.\n6. Jika terdapat link:\n   - tampilkan hanya SATU kali\n   - gunakan format natural seperti:\n     \"Informasi lebih lanjut dapat dilihat melalui link berikut:\"\n7. Jika terdapat alamat/lokasi:\n   - jelaskan secara singkat dan jelas\n   - jangan mengulang alamat\n8. Jangan menampilkan simbol markdown seperti:\n   - **\n   - ##\n   - []\n9. Hindari jawaban terlalu panjang dan bertele-tele.\n10. Jangan membuat informasi di luar data FAQ.\n\nPenutup:\n- Gunakan penutup singkat dan sopan.\n- Tambahkan kontak WhatsApp HANYA SEKALI di akhir jawaban jika memang belum ada pada isi jawaban.\n- Jika jawaban sudah mengandung nomor WhatsApp atau link kontak, jangan ulangi lagi.\n- Gunakan format:\n  \"Jika membutuhkan bantuan lebih lanjut, silakan hubungi layanan WhatsApp resmi kami:\n  https://wa.me/62XXXXXXXXXX\"\n\nJika data FAQ berisi:\n\"NOT_FOUND\"\n\nMaka jawab:\n\"Mohon maaf, informasi yang Anda tanyakan belum tersedia saat ini. Silakan menghubungi layanan WhatsApp resmi kami untuk bantuan lebih lanjut:\nhttps://wa.me/62XXXXXXXXXX\"\n\nGaya bahasa:\n- Formal namun ramah\n- Profesional\n- Tidak terlalu kaku\n- Tidak terlalu panjang\n\nJawab pertanyaan pengguna sekarang."
+        }
+      },
+      "id": "6b7ea4d9-c072-4d40-92a1-4225cb554625",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1056,
+        480
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{ pertanyaan: $json.message, jawaban: $json.output, waktu: new Date().toISOString() }];"
+      },
+      "id": "3e941cc0-e012-4c7e-9d7f-29811a4fb447",
+      "name": "Format Log",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        1312,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"reply\": $json.jawaban } }}",
+        "options": {}
+      },
+      "id": "bed2727f-f956-4978-b950-6ec649a760f8",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1456,
+        480
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "78b34efb-8a26-420b-9421-c4afbb26ad72",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1056,
+        688
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        688
+      ],
+      "id": "b2e52aa2-2a23-421e-989b-47875a215b20",
+      "name": "OpenAI Chat Model1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Clean Input": {
+      "main": [
+        [
+          {
+            "node": "AI Intent Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Intent Classifier": {
+      "main": [
+        [
+          {
+            "node": "Parse Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Intent": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (FAQ)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets (FAQ)": {
+      "main": [
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Log": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Intent Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Clean Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {},
+  "tags": []
+}
