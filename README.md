@@ -43,7 +43,7 @@ n8n, OpenAI API (`gpt-4o-mini`), Google Sheets API, Webhook/REST
 
 ## Setup
 
-1. Import `faq_chatbot_workflow.sanitized.json` into n8n.
+1. Import `faq_chatbot_workflow.json` into n8n.
 2. Create a Google Sheet with these columns: `intent`, `question`, `answer`, `url`. Each row's `intent` must match one label in the classifier prompt.
 3. In the **Google Sheets (FAQ)** node, select your spreadsheet and add your Google credential.
 4. In both **OpenAI Chat Model** nodes, add your OpenAI credential.
